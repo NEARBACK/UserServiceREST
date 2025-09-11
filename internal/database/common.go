@@ -12,12 +12,12 @@ import (
 type ContextKey string
 
 var (
-	conf = new(config)
+	dbConf = new(PostgresConfig)
 )
 
 // Init initialization from environment variables
 func init() {
-	if err := envconfig.Process("", conf); err != nil {
+	if err := envconfig.Process("", dbConf); err != nil {
 		log.Fatalf("db layer failed to load configuration: %s", err)
 	}
 }
@@ -27,7 +27,7 @@ var _ IDatabase = (*Database)(nil)
 func New(log definitions.Logger) (*Database, error) {
 	dbl := &Database{log: log}
 	var err error
-
+	conf := dbConf.UrlConfig()
 	log.Info("Connect to master postgresql")
 	masterConfig, err := pgxpool.ParseConfig(conf.PostgresMasterAddr)
 	if err != nil {
